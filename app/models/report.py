@@ -17,7 +17,7 @@ class Report(db.Model):
     )
 
     version = db.Column(db.Integer, nullable=False, default=1)
-    status = db.Column(db.Text, nullable=False)  # draft/final
+    status = db.Column(db.Text, nullable=False, default='draft')  # draft/final
 
     data = db.Column(JSONB, nullable=False)
 

@@ -15,6 +15,9 @@ class User(db.Model):
 
     role = db.Column(db.Text, nullable=False)
 
+    is_email_verified = db.Column(db.Boolean, nullable=False, default=False)
+    email_verification_token = db.Column(db.Text)
+
     created_at = db.Column(
         db.DateTime, server_default=func.now(), nullable=False
     )
