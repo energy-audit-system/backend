@@ -296,6 +296,11 @@ draft → final
   - 3 route blueprints (auth, audit_orders, reports)
   - 6 API endpoints implemented
   - PostgreSQL with 4 schemas (auth, core, reports, logs)
+- **API Documentation**: Created API.md - comprehensive API documentation in Russian
+  - Full endpoint documentation with request/response examples
+  - Data models and error codes reference
+  - Code examples in JavaScript for frontend integration
+  - Russian language for frontend team collaboration
 
 ### Previous Changes (from git history)
 - **2609a68**: Add PATCH endpoint for reports and update timestamps
