@@ -127,10 +127,12 @@
 **report_history** table:
 - `id` (BIGSERIAL PK)
 - `report_id` (BIGINT FK → reports.reports)
-- `user_id` (BIGINT FK → auth.users)
-- `action` (TEXT) - Description of change
-- `diff` (JSONB) - Change details
+- `user_id` (BIGINT FK → auth.users, nullable)
+- `action_type` (TEXT) - CHECK: 'created', 'updated', 'status_changed', 'archived', 'restored', 'deleted'
+- `description` (TEXT) - Human-readable description
+- `changes` (JSONB) - Structured changes: `{"field": "status", "old_value": "draft", "new_value": "final"}`
 - `created_at` (TIMESTAMP)
+- Indexed on: report_id, user_id, action_type, created_at
 
 ---
 
@@ -179,12 +181,21 @@
 
 ### Utilities
 
-**Location**: `/app/utils/security.py`
-
+**Security** (`/app/utils/security.py`):
 - `hash_password(password)` - Werkzeug password hashing
 - `check_password(password, hash)` - Password verification
 - `generate_token(user_id, role)` - JWT token generation
 - `verify_token(token)` - JWT token validation
+
+**Logging** (`/app/utils/logging.py`):
+- `ReportLogger.log_creation()` - Log report creation
+- `ReportLogger.log_update()` - Log report data updates
+- `ReportLogger.log_status_change()` - Log status changes (draft → final)
+- `ReportLogger.log_archive()` - Log archiving
+- `ReportLogger.log_restore()` - Log restoration from archive
+- `ReportLogger.log_deletion()` - Log deletion
+- `ReportLogger.get_report_history()` - Get audit trail for report
+- `ReportLogger.get_user_actions()` - Get user's recent actions
 
 ---
 
@@ -288,6 +299,19 @@ draft → final
 ---
 
 ## Changelog
+
+### 2026-01-09
+- **Report History & Audit Trail System**: Implemented comprehensive logging for all report changes
+  - Created SQL migration `001_alter_report_history.sql` to improve table structure
+  - Updated `ReportHistory` model with new fields: `action_type`, `description`, `changes`
+  - Replaced `action` and `diff` columns with structured approach
+  - Added CHECK constraint for action_type: created, updated, status_changed, archived, restored, deleted
+  - Created `ReportLogger` utility class (`/app/utils/logging.py`) with methods for all action types
+  - Implemented automatic logging in POST `/reports/post_report` endpoint (creation)
+  - Implemented automatic logging in PATCH `/reports/<id>` endpoint (updates)
+  - Added indexes on action_type and created_at for query performance
+  - Logging tracks old and new values in structured JSONB format
+  - Ready for server migration with full audit trail
 
 ### 2026-01-07
 - **Initial Documentation**: Created claude.md for project structure reference
