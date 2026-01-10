@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:14-alpine
+    container_name: energy_audit_db
+    restart: always
+    environment:
+      POSTGRES_DB: energy_audit
+      POSTGRES_USER: asattorov
+      POSTGRES_PASSWORD: neda2020luba
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      # ВАЖНО: Используем БОЛЬШОЙ диск напрямую (bind mount)
+      - /share/CACHEDEV1_DATA/energy-audit/database:/var/lib/postgresql/data
+      - ./database:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "5432:5432"
+    networks:
+      - energy_audit_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U asattorov -d energy_audit"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend API (без сборки образа - используем готовый Python)
+  backend:
+    image: python:3.11-slim
+    container_name: energy_audit_backend
+    restart: always
+    working_dir: /app
+    # Устанавливаем зависимости и запускаем при старте
+    command: >
+      sh -c "
+      echo 'Installing system dependencies...' &&
+      apt-get update -qq &&
+      apt-get install -y -qq gcc postgresql-client libpq-dev &&
+      echo 'Installing Python packages...' &&
+      pip install --no-cache-dir -q -r requirements.txt &&
+      echo 'Starting Flask application...' &&
+      python run.py
+      "
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URI: postgresql://asattorov:neda2020luba@postgres:5432/energy_audit
+      FLASK_ENV: production
+      SECRET_KEY: neda2331_change_me_in_production
+      JWT_ALGORITHM: HS256
+      JWT_EXPIRE_HOURS: 24
+      PYTHONUNBUFFERED: 1
+    ports:
+      - "5000:5000"
+    volumes:
+      # Монтируем весь проект с БОЛЬШОГО диска
+      - /share/CACHEDEV1_DATA/energy-audit/backend:/app
+      - /share/CACHEDEV1_DATA/energy-audit/logs:/app/logs
+    networks:
+      - energy_audit_network
+
+networks:
+  energy_audit_network:
+    driver: bridge
