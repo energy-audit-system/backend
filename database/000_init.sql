@@ -1,9 +1,13 @@
 -- Energy Audit DB
 -- Initial schema
--- Version: 0.1
+-- Version: 0.2
 -- Author: asattorov
--- Date: 2025-12-13
--- IMPORTANT: Do not edit after migrations start
+-- Date: 2026-01-09
+-- Updated: Синхронизировано с текущими моделями
+
+-- ============================================
+-- SCHEMA: auth - Аутентификация и пользователи
+-- ============================================
 
 -- === SCHEMAS ===
 CREATE SCHEMA IF NOT EXISTS auth;
@@ -22,9 +26,17 @@ CREATE TABLE auth.users (
         role IN ('engineer', 'client', 'admin')
     ),
 
+    -- Email verification
+    is_email_verified           BOOLEAN NOT NULL DEFAULT FALSE,
+    email_verification_token    TEXT,
+
     created_at      TIMESTAMP NOT NULL DEFAULT now(),
     updated_at      TIMESTAMP NOT NULL DEFAULT now()
 );
+
+-- ============================================
+-- SCHEMA: core - Бизнес логика
+-- ============================================
 
 CREATE TABLE core.business (
     id              BIGSERIAL PRIMARY KEY,
@@ -54,9 +66,21 @@ CREATE TABLE core.audit_orders (
 
     access_until    DATE,
 
+    -- Информация о здании
+    building_type       TEXT NOT NULL,
+    building_subtype    TEXT NOT NULL,
+
+    -- Дополнительные данные заказа (JSONB для гибкости)
+    order_data      JSONB,
+
     created_at      TIMESTAMP NOT NULL DEFAULT now(),
     updated_at      TIMESTAMP NOT NULL DEFAULT now()
 );
+
+-- ============================================
+-- SCHEMA: reports - Отчёты и файлы
+-- ============================================
+
 CREATE TABLE reports.reports (
     id              BIGSERIAL PRIMARY KEY,
 
@@ -66,7 +90,7 @@ CREATE TABLE reports.reports (
 
     version         INTEGER NOT NULL DEFAULT 1,
 
-    status          TEXT NOT NULL CHECK (
+    status          TEXT NOT NULL DEFAULT 'draft' CHECK (
         status IN ('draft', 'final')
     ),
 
@@ -79,6 +103,7 @@ CREATE TABLE reports.reports (
 
     CONSTRAINT uq_report_version UNIQUE (audit_order_id, version)
 );
+
 CREATE TABLE reports.files (
     id              BIGSERIAL PRIMARY KEY,
 
@@ -94,6 +119,14 @@ CREATE TABLE reports.files (
 
     created_at      TIMESTAMP NOT NULL DEFAULT now()
 );
+
+-- ============================================
+-- SCHEMA: logs - Аудит и логирование
+-- ============================================
+
+-- Таблица истории изменений отчётов
+-- ВАЖНО: Эта структура будет изменена миграцией 001_alter_report_history.sql
+-- Здесь создаётся начальная версия
 CREATE TABLE logs.report_history (
     id              BIGSERIAL PRIMARY KEY,
 
@@ -101,7 +134,7 @@ CREATE TABLE logs.report_history (
         REFERENCES reports.reports(id)
         ON DELETE CASCADE,
 
-    user_id         BIGINT NOT NULL
+    user_id         BIGINT
         REFERENCES auth.users(id)
         ON DELETE SET NULL,
 
@@ -111,21 +144,79 @@ CREATE TABLE logs.report_history (
 
     created_at      TIMESTAMP NOT NULL DEFAULT now()
 );
-CREATE INDEX idx_users_role ON auth.users(role);
 
+-- ============================================
+-- INDEXES - Индексы для производительности
+-- ============================================
+
+-- auth.users indexes
+CREATE INDEX idx_users_role ON auth.users(role);
+CREATE INDEX idx_users_email ON auth.users(email);
+
+-- core.business indexes
 CREATE INDEX idx_business_owner ON core.business(owner_id);
 
-CREATE INDEX idx_audit_orders_business
-    ON core.audit_orders(business_id);
+-- core.audit_orders indexes
+CREATE INDEX idx_audit_orders_business ON core.audit_orders(business_id);
+CREATE INDEX idx_audit_orders_status ON core.audit_orders(status);
 
-CREATE INDEX idx_reports_audit_order
-    ON reports.reports(audit_order_id);
+-- reports.reports indexes
+CREATE INDEX idx_reports_audit_order ON reports.reports(audit_order_id);
+CREATE INDEX idx_reports_data_gin ON reports.reports USING GIN (data);
+CREATE INDEX idx_reports_status ON reports.reports(status);
 
-CREATE INDEX idx_reports_data_gin
-    ON reports.reports USING GIN (data);
+-- reports.files indexes
+CREATE INDEX idx_report_files_report ON reports.files(report_id);
 
-CREATE INDEX idx_report_files_report
-    ON reports.files(report_id);
+-- logs.report_history indexes
+CREATE INDEX idx_report_history_report ON logs.report_history(report_id);
+CREATE INDEX idx_report_history_user ON logs.report_history(user_id);
 
-CREATE INDEX idx_report_history_report
-    ON logs.report_history(report_id);
+-- ============================================
+-- TRIGGERS - Автоматическое обновление updated_at
+-- ============================================
+
+-- Функция для автоматического обновления updated_at
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = now();
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+-- Триггер для auth.users
+CREATE TRIGGER update_users_updated_at
+    BEFORE UPDATE ON auth.users
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
+-- Триггер для core.audit_orders
+CREATE TRIGGER update_audit_orders_updated_at
+    BEFORE UPDATE ON core.audit_orders
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
+-- Триггер для reports.reports
+CREATE TRIGGER update_reports_updated_at
+    BEFORE UPDATE ON reports.reports
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
+-- ============================================
+-- COMMENTS - Документация таблиц
+-- ============================================
+
+COMMENT ON TABLE auth.users IS 'Пользователи системы (клиенты, инженеры, администраторы)';
+COMMENT ON TABLE core.business IS 'Предприятия клиентов';
+COMMENT ON TABLE core.audit_orders IS 'Заказы на энергоаудит';
+COMMENT ON TABLE reports.reports IS 'Отчёты по энергоаудиту';
+COMMENT ON TABLE reports.files IS 'Файлы отчётов (PDF, XLSX, архивы)';
+COMMENT ON TABLE logs.report_history IS 'История изменений отчётов (аудит трейл)';
+
+COMMENT ON COLUMN auth.users.role IS 'Роль: engineer (инженер), client (клиент), admin (администратор)';
+COMMENT ON COLUMN auth.users.is_email_verified IS 'Подтверждён ли email пользователя';
+COMMENT ON COLUMN core.audit_orders.status IS 'Статус: pending, in_progress, ready, paid, archived';
+COMMENT ON COLUMN core.audit_orders.order_data IS 'Дополнительные данные заказа в формате JSONB';
+COMMENT ON COLUMN reports.reports.data IS 'Данные отчёта в формате JSONB';
+COMMENT ON COLUMN reports.reports.status IS 'Статус отчёта: draft (черновик), final (финальный)';
