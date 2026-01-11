@@ -5,6 +5,12 @@
 -- Date: 2025-12-13
 -- IMPORTANT: Do not edit after migrations start
 
+-- === SCHEMAS ===
+CREATE SCHEMA IF NOT EXISTS auth;
+CREATE SCHEMA IF NOT EXISTS core;
+CREATE SCHEMA IF NOT EXISTS reports;
+CREATE SCHEMA IF NOT EXISTS logs;
+
 CREATE TABLE auth.users (
     id              BIGSERIAL PRIMARY KEY,
     full_name       TEXT NOT NULL,
