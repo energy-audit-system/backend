@@ -3,6 +3,23 @@
 -- Описание: Фейковые данные для разработки и тестирования
 
 -- ============================================
+-- ОЧИСТКА СУЩЕСТВУЮЩИХ ТЕСТОВЫХ ДАННЫХ
+-- ============================================
+
+-- Удаляем только тестовые данные (пользователей с @example.com)
+-- Cascade удалит связанные записи
+DELETE FROM auth.users WHERE email LIKE '%@example.com';
+
+-- Сброс счетчиков ID для предсказуемых ID (опционально)
+-- Раскомментируйте, если нужны предсказуемые ID начиная с 1
+-- ALTER SEQUENCE auth.users_id_seq RESTART WITH 1;
+-- ALTER SEQUENCE core.business_id_seq RESTART WITH 1;
+-- ALTER SEQUENCE core.audit_orders_id_seq RESTART WITH 1;
+-- ALTER SEQUENCE reports.reports_id_seq RESTART WITH 1;
+-- ALTER SEQUENCE reports.files_id_seq RESTART WITH 1;
+-- ALTER SEQUENCE logs.report_history_id_seq RESTART WITH 1;
+
+-- ============================================
 -- USERS - Пользователи системы
 -- ============================================
 
@@ -11,29 +28,35 @@
 
 INSERT INTO auth.users (full_name, email, phone, password_hash, role, is_email_verified, email_verification_token) VALUES
 -- Инженеры
-('Иванов Иван Петрович', 'engineer1@example.com', '+7 (999) 111-22-33', 'scrypt:32768:8:1$oR8vYKGxV2PzN4jH$a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6a7b8c9d0e1f2g3h4i5j6k7l8m9n0o1p2', 'engineer', true, NULL),
-('Петрова Мария Александровна', 'engineer2@example.com', '+7 (999) 222-33-44', 'scrypt:32768:8:1$oR8vYKGxV2PzN4jH$a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6a7b8c9d0e1f2g3h4i5j6k7l8m9n0o1p2', 'engineer', true, NULL),
-('Сидоров Алексей Викторович', 'engineer3@example.com', '+7 (999) 333-44-55', 'scrypt:32768:8:1$oR8vYKGxV2PzN4jH$a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6a7b8c9d0e1f2g3h4i5j6k7l8m9n0o1p2', 'engineer', true, NULL),
+('Иванов Иван Петрович', 'engineer1@example.com', '+7 (999) 111-22-33', 'scrypt:32768:8:1$0osS5t9h4At2vCjB$66d2fec06eb5ee3df5b40db6ea8b1de786cd158fc1105cd98ac6403428dfe7baa7d706c09bd11ddffd2c22e60f40261d3d7094209a0897671041472d06700a8e', 'engineer', true, NULL),
+('Петрова Мария Александровна', 'engineer2@example.com', '+7 (999) 222-33-44', 'scrypt:32768:8:1$OMOopYYDWIsighh7$2df680bf20d5e47aaaf9d5228658dc0159521bd370e19501020006d63c08bd98a983c4d1982bc1ffb9dca91c25ce2a6b4d9f9bec8df06799a864277c12ad14a9', 'engineer', true, NULL),
+('Сидоров Алексей Викторович', 'engineer3@example.com', '+7 (999) 333-44-55', 'scrypt:32768:8:1$6epQuhKe9pHKxEzW$13daf70c9dff958497a184815dfcefdeef6fb1516a3fb7ff115e82e3ca3071eebdfd8ce57fd6e1ffa46037b4cf3441b0afa1af2d90e7048dca15e6e3121a3992', 'engineer', true, NULL),
 
 -- Клиенты
-('Смирнов Дмитрий Олегович', 'client1@example.com', '+7 (999) 444-55-66', 'scrypt:32768:8:1$oR8vYKGxV2PzN4jH$a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6a7b8c9d0e1f2g3h4i5j6k7l8m9n0o1p2', 'client', true, NULL),
-('Кузнецова Елена Сергеевна', 'client2@example.com', '+7 (999) 555-66-77', 'scrypt:32768:8:1$oR8vYKGxV2PzN4jH$a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6a7b8c9d0e1f2g3h4i5j6k7l8m9n0o1p2', 'client', true, NULL),
-('Попов Андрей Николаевич', 'client3@example.com', '+7 (999) 666-77-88', 'scrypt:32768:8:1$oR8vYKGxV2PzN4jH$a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6a7b8c9d0e1f2g3h4i5j6k7l8m9n0o1p2', 'client', true, NULL),
-('Васильева Ольга Ивановна', 'client4@example.com', '+7 (999) 777-88-99', 'scrypt:32768:8:1$oR8vYKGxV2PzN4jH$a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6a7b8c9d0e1f2g3h4i5j6k7l8m9n0o1p2', 'client', true, NULL),
+('Смирнов Дмитрий Олегович', 'client1@example.com', '+7 (999) 444-55-66', 'scrypt:32768:8:1$cFdKgwRhARnkx48Q$1ce1277922ff4467d0b8b15a17e1076d9cee805e9adc77a2845e7347a49099f0b5cf69e8077901ee6004c3d46391f711a80fecd6d596ed7550efc2ddcba4ed7b', 'client', true, NULL),
+('Кузнецова Елена Сергеевна', 'client2@example.com', '+7 (999) 555-66-77', 'scrypt:32768:8:1$NqGuojfsiU3rQLs2$8871b1edd1e55e22006ba56fe2bd329970afaf03783baa6cf07ff3ab3f50740057ef66d6ae2a2b0edcd5bb98a04fdf3196b7f49522f0607208fbb118f5873858', 'client', true, NULL),
+('Попов Андрей Николаевич', 'client3@example.com', '+7 (999) 666-77-88', 'scrypt:32768:8:1$eguM3Nm1DQjjjiKs$333e25aedf34e5308090a0143ff23f7d54558c4df3f6c801c433410221cbc7a10fc2d3527e025c4614d30b70676ef6de0af2b4261c7a819885f5b80498dc1c79', 'client', true, NULL),
+('Васильева Ольга Ивановна', 'client4@example.com', '+7 (999) 777-88-99', 'scrypt:32768:8:1$wtiQt2OfRaW7SAvQ$cf882c9e0a05a83f0f5f3b13bde3134b6556a814bb378f9d4171c1a5af64ddb7c582227a8b845b2bde203e0072c986fd2522471e42619de54e1d96c832551a0d', 'client', true, NULL),
 
 -- Администраторы
-('Администратов Админ Админович', 'admin@example.com', '+7 (999) 000-00-00', 'scrypt:32768:8:1$oR8vYKGxV2PzN4jH$a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6a7b8c9d0e1f2g3h4i5j6k7l8m9n0o1p2', 'admin', true, NULL);
+('Администратов Админ Админович', 'admin@example.com', '+7 (999) 000-00-00', 'scrypt:32768:8:1$tg3FcOXITs8uundj$2d6509f4160a829bc0226f3b86cbe5d5ba20c3d2df7acc8f345ac1e18fdf81aad59246f21f0b87b2c2a3f3a9343724e250ab984a35f8ebd18c28ed67338c9727', 'admin', true, NULL);
 
 -- ============================================
 -- BUSINESS - Предприятия клиентов
 -- ============================================
 
+-- Используем подзапросы для получения ID пользователей по email
 INSERT INTO core.business (business_name, address, inn, owner_id) VALUES
-('ООО "ЭнергоПром"', 'г. Москва, ул. Ленина, д. 10, оф. 5', '7707123456', 4),
-('АО "ТеплоЭнерго"', 'г. Санкт-Петербург, Невский пр., д. 25', '7812234567', 5),
-('ИП Попов А.Н.', 'г. Екатеринбург, ул. Мира, д. 15', '6658345678', 6),
-('ООО "СветТорг"', 'г. Новосибирск, пр. Карла Маркса, д. 7', '5406456789', 7),
-('ООО "ПромСтрой"', 'г. Казань, ул. Баумана, д. 30', '1655567890', 4);
+('ООО "ЭнергоПром"', 'г. Москва, ул. Ленина, д. 10, оф. 5', '7707123456',
+    (SELECT id FROM auth.users WHERE email = 'client1@example.com')),
+('АО "ТеплоЭнерго"', 'г. Санкт-Петербург, Невский пр., д. 25', '7812234567',
+    (SELECT id FROM auth.users WHERE email = 'client2@example.com')),
+('ИП Попов А.Н.', 'г. Екатеринбург, ул. Мира, д. 15', '6658345678',
+    (SELECT id FROM auth.users WHERE email = 'client3@example.com')),
+('ООО "СветТорг"', 'г. Новосибирск, пр. Карла Маркса, д. 7', '5406456789',
+    (SELECT id FROM auth.users WHERE email = 'client4@example.com')),
+('ООО "ПромСтрой"', 'г. Казань, ул. Баумана, д. 30', '1655567890',
+    (SELECT id FROM auth.users WHERE email = 'client1@example.com'));
 
 -- ============================================
 -- AUDIT_ORDERS - Заказы на энергоаудит
@@ -231,47 +254,47 @@ INSERT INTO reports.files (report_id, file_type, cloud_path) VALUES
 -- эти данные будут автоматически преобразованы в новый формат
 
 INSERT INTO logs.report_history (report_id, user_id, action, diff, created_at) VALUES
--- История первого отчёта
-(1, 1, 'Создан черновик отчёта',
+-- История первого отчёта (инженер: engineer1@example.com)
+(1, (SELECT id FROM auth.users WHERE email = 'engineer1@example.com'), 'Создан черновик отчёта',
     '{"version": 1, "status": "draft"}'::jsonb,
     '2026-01-05 10:30:00'),
 
-(1, 1, 'Добавлены рекомендации по освещению',
+(1, (SELECT id FROM auth.users WHERE email = 'engineer1@example.com'), 'Добавлены рекомендации по освещению',
     '{"recommendations_count": {"old": 0, "new": 1}}'::jsonb,
     '2026-01-05 14:20:00'),
 
-(1, 1, 'Добавлены рекомендации по ЧП и утеплению',
+(1, (SELECT id FROM auth.users WHERE email = 'engineer1@example.com'), 'Добавлены рекомендации по ЧП и утеплению',
     '{"recommendations_count": {"old": 1, "new": 3}}'::jsonb,
     '2026-01-06 11:15:00'),
 
-(1, 1, 'Отчёт переведён в финальный статус',
+(1, (SELECT id FROM auth.users WHERE email = 'engineer1@example.com'), 'Отчёт переведён в финальный статус',
     '{"status": {"old": "draft", "new": "final"}}'::jsonb,
     '2026-01-15 16:45:00'),
 
--- История второго отчёта
-(2, 2, 'Создан черновик отчёта',
+-- История второго отчёта (инженер: engineer2@example.com)
+(2, (SELECT id FROM auth.users WHERE email = 'engineer2@example.com'), 'Создан черновик отчёта',
     '{"version": 1, "status": "draft"}'::jsonb,
     '2025-12-10 09:00:00'),
 
-(2, 2, 'Обновлены данные по энергопотреблению',
+(2, (SELECT id FROM auth.users WHERE email = 'engineer2@example.com'), 'Обновлены данные по энергопотреблению',
     '{"energy_consumption": "updated"}'::jsonb,
     '2025-12-12 13:30:00'),
 
-(2, 2, 'Отчёт утверждён',
+(2, (SELECT id FROM auth.users WHERE email = 'engineer2@example.com'), 'Отчёт утверждён',
     '{"status": {"old": "draft", "new": "final"}}'::jsonb,
     '2025-12-20 17:00:00'),
 
--- История третьего отчёта
-(3, 3, 'Создан черновик отчёта',
+-- История третьего отчёта (инженер: engineer3@example.com)
+(3, (SELECT id FROM auth.users WHERE email = 'engineer3@example.com'), 'Создан черновик отчёта',
     '{"version": 1, "status": "draft"}'::jsonb,
     '2026-01-10 10:00:00'),
 
-(3, 3, 'Добавлена рекомендация по холодильному оборудованию',
+(3, (SELECT id FROM auth.users WHERE email = 'engineer3@example.com'), 'Добавлена рекомендация по холодильному оборудованию',
     '{"recommendations_count": {"old": 0, "new": 1}}'::jsonb,
     '2026-01-11 15:30:00'),
 
--- История четвертого отчёта
-(4, 1, 'Создан первоначальный черновик',
+-- История четвертого отчёта (инженер: engineer1@example.com)
+(4, (SELECT id FROM auth.users WHERE email = 'engineer1@example.com'), 'Создан первоначальный черновик',
     '{"version": 1, "status": "draft"}'::jsonb,
     '2026-01-12 11:45:00');
 
