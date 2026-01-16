@@ -39,6 +39,9 @@ def register():
 
     return jsonify({
         "id": user.id,
+        "full_name": user.full_name,
+        "email": user.email,
+        "phone": user.phone,
         "token": token,
         "role": user.role,
     }), 201
@@ -64,6 +67,9 @@ def login():
         "id": user.id,
         "token": token,
         "role": user.role,
+        "full_name": user.full_name,
+        "email": user.email,
+        "phone": user.phone
     })
 
 
@@ -84,4 +90,12 @@ def verify_email():
 
     db.session.commit()
 
-    return jsonify({"message": "Email verified successfully"})
+    return jsonify({
+        "id": user.id,
+        "full_name": user.full_name,
+        "email": user.email,
+        "phone": user.phone,
+        "token": token,
+        "role": user.role,
+        "is_email_verified": user.is_email_verified
+    })
