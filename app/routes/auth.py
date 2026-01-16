@@ -39,9 +39,9 @@ def register():
 
     return jsonify({
         "id": user.id,
-        "full_name"=data["full_name"],
-        "email"=data["email"],
-        "phone"=data.get("phone"),
+        "full_name":data["full_name"],
+        "email":data["email"],
+        "phone": data.get("phone"),
         "role": user.role,
         "token": token,  # JWT (для авторизации)
         "email_verification_token": verification_token,  # 👈 ВАЖНО
