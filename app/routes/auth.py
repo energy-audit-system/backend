@@ -39,9 +39,9 @@ def register():
 
     return jsonify({
         "id": user.id,
-        "full_name":data["full_name"],
-        "email":data["email"],
-        "phone": data.get("phone"),
+        "full_name": user.full_name,
+        "email": user.email,
+        "phone": user.phone,
         "role": user.role,
         "token": token,  # JWT (для авторизации)
         "email_verification_token": verification_token,  # 👈 ВАЖНО
@@ -81,23 +81,26 @@ def verify_email():
 
     if not token:
         return jsonify({"error": "Missing token"}), 400
-    
+
     user = User.query.filter_by(email_verification_token=token).first()
 
     if not user:
         return jsonify({"error": "Invalid token"}), 400
-    
+
     user.is_email_verified = True
     user.email_verification_token = None
 
     db.session.commit()
+
+    # Генерируем JWT для автологина
+    jwt_token = generate_jwt(user.id, user.role)
 
     return jsonify({
         "id": user.id,
         "full_name": user.full_name,
         "email": user.email,
         "phone": user.phone,
-        "token": token,
+        "token": jwt_token,  # JWT токен для автологина
         "role": user.role,
         "is_email_verified": user.is_email_verified
     })
