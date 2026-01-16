@@ -39,9 +39,12 @@ def register():
 
     return jsonify({
         "id": user.id,
+        "full_name"=data["full_name"],
+        "email"=data["email"],
+        "phone"=data.get("phone"),
         "role": user.role,
         "token": token,  # JWT (для авторизации)
-        "email_verification_token": verification_token  # 👈 ВАЖНО
+        "email_verification_token": verification_token,  # 👈 ВАЖНО
     }), 201
 
 
@@ -65,6 +68,10 @@ def login():
         "id": user.id,
         "token": token,
         "role": user.role,
+        "full_name": user.full_name,
+        "email": user.email,
+        "phone": user.phone,
+        "is_email_verified": user.is_email_verified
     })
 
 
@@ -85,4 +92,12 @@ def verify_email():
 
     db.session.commit()
 
-    return jsonify({"message": "Email verified successfully"})
+    return jsonify({
+        "id": user.id,
+        "full_name": user.full_name,
+        "email": user.email,
+        "phone": user.phone,
+        "token": token,
+        "role": user.role,
+        "is_email_verified": user.is_email_verified
+    })
