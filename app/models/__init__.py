@@ -4,3 +4,4 @@ from .audit_order import AuditOrder
 from .report import Report
 from .report_file import ReportFile
 from .report_history import ReportHistory
+from .user_request import UserRequest
